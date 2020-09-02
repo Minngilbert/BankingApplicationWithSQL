@@ -23,11 +23,22 @@ public class DriverApp {
 	public static void main(String args[]) {
 		DriverApp dr = new DriverApp();	
 		try {
-			dr.launchMenu();
+			dr.launchMenu();	
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+	}
+	
+	//before transaction to an account, method checks that account id is contained in db
+	public boolean isValidId(int accountId) throws SQLException {
+		ArrayList<Account> accounts = adi.getAllAccounts();
+		for(Account a: accounts) {
+			if(a.getAccountId() == accountId) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	//This method is run on start up
@@ -42,6 +53,11 @@ public class DriverApp {
 			switch(choice) {
 			case 1:
 				doUserLogin();
+				if(currUser.getUserType() == 1) {
+					userMenu();	
+				}
+				else useradminMenu();
+
 				valid = true;
 				break;
 			case 2:
@@ -54,6 +70,9 @@ public class DriverApp {
 			default:
 				System.out.println("Invalid input, try again");
 			}
+		}
+		if(currUser.getUserType() == 1) {
+			
 		}
 	}
 	
@@ -185,11 +204,13 @@ public class DriverApp {
 	
 	//Shows normal user account menu
 	public void userMenu() throws SQLException {
+		
 		ArrayList<Account> accounts = adi.getAccountsByUserName(currUser.getUserName());
 		char choice ;
 		boolean isValid = false;
 		int accountId;
-		while(isValid) {
+		
+		while(!isValid) {
 			System.out.println("Enter V to view active bank accounts");
 			System.out.println("Enter D to make a deposit");
 			System.out.println("Enter W to withdraw funds");
@@ -208,7 +229,7 @@ public class DriverApp {
 				case 'd':
 					System.out.println("Please enter the account number you wish to depoist to");
 					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
-					if(accountId == 0) {
+					if(accountId == 0 && !isValidId(accountId)) {
 						System.out.println("The account entered does not exist");
 						break;
 					}else doDeposit(accountId);
@@ -218,16 +239,15 @@ public class DriverApp {
 					System.out.println("Please enter the account number you wish to withdraw from");
 					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
 					
-					if(accountId == 0) {
-						System.out.println("The account entered does not exist");
-						break;
-					}
-					for(Account a: accounts) {
-						if(a.getAccountId() != accountId) {
-							System.out.println("The account entered does not belong to you");
+					if(accountId != 0 && isValidId(accountId)) {
+						for(Account a: accounts) {
+							if(a.getAccountId() == accountId) {
+								doWithdrawal(accountId);
+							}
 						}
-					}	
-					doWithdrawal(accountId);
+					}else System.out.println("The account entered does not exist");
+				
+			
 					break;
 				case 'c':
 					createAccount(currUser.getUserName());
@@ -256,6 +276,115 @@ public class DriverApp {
 		}
 	}
 	
+	
+	public void useradminMenu() throws SQLException {
+		
+		ArrayList<Account> accounts = adi.getAllAccounts();
+		ArrayList<User> users = udi.getAllUsers();
+		int choice ;
+		boolean isValid = false;
+		int accountId;
+		
+		while(!isValid) {
+			System.out.println("Enter 1 to view active all bank accounts");
+			System.out.println("Enter 2 to view active all User accounts");
+			System.out.println("Enter 3 to make a deposit to an account");
+			System.out.println("Enter 4 to withdraw funds from account");
+			System.out.println("Enter 5 to delete users by username");
+			System.out.println("Enter 6 to delete All users");
+			System.out.println("Enter 7 to create a new bank account for user");
+			System.out.println("Enter 8 to log out");
+			
+			if(accounts.size() > 1) {
+				
+				choice = Integer.parseInt(isvalidInteger(cons.nextLine()));
+				switch(choice) {
+				case 1:
+					//View Open bank accounts
+					for(Account a: accounts) {
+						System.out.println(a.toString());
+					}
+					break;
+				case 2:
+					//View Open User accounts
+					for(User u: users) {
+						System.out.println(u.toString());
+					}
+					break;
+					
+				case 3:
+					//deposit
+					System.out.println("Please enter the account number you wish to depoist to");
+					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
+					if(accountId == 0 && !isValidId(accountId)) {
+						System.out.println("The account entered does not exist");
+						break;
+					}else {
+						doDeposit(accountId);
+						accounts = adi.getAllAccounts();
+					}
+					break;
+				case 4:
+					//withdraw
+					System.out.println("Please enter the account number you wish to withdraw from");
+					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
+					
+					if(accountId != 0 && isValidId(accountId)) {
+						doWithdrawal(accountId);
+						accounts = adi.getAllAccounts();
+					}else System.out.println("The account entered does not exist");
+	
+					break;
+				case 5:
+					//delete one bank account
+					System.out.println("Enter the username of the account you wish to delete");
+					String username = cons.nextLine();
+					if(udi.deleteUser(username)) {
+						System.out.println("Successfully deleted "+ username);
+						users = udi.getAllUsers();
+					}else System.out.println("User with username "+ username + " was not found");
+					
+					break;
+				case 6:
+					//delete All Bank Accounts
+					deleteAllBankAccounts();
+					users = udi.getAllUsers();
+					break;
+					
+				case 7:
+					System.out.println("Enter the username of the account you want to create a new bank account for");
+					username = cons.nextLine();
+					
+					for(User u: users) {
+						if(u.getUserName().equals(username)) {
+							createAccount(username);
+						}
+					}	
+					accounts =  adi.getAllAccounts();
+				case 8:
+					isValid = true;
+					break;
+				default:
+					System.out.println("Invalid input, try again");
+				}	
+			}
+		}
+	}
+	
+	public void deleteAllBankAccounts() throws SQLException {
+		System.out.println("Are you sure you went to delete all users y/n");
+		char choice = cons.nextLine().toLowerCase().charAt(0);
+		switch(choice) {
+		case 'y':
+			if(udi.deleteAllUsers()) System.out.println("All accounts have been deleted");
+			break;
+		default:
+			System.out.println("Disaster avoided, all accounts are still safe");
+		
+		}
+		
+	}
+
 	//creates a new bank account for the user and validates that the user has less than 3 accounts
 	public void createAccount(String accountUserName) throws SQLException {
 		ArrayList<Account> accounts = adi.getAccountsByUserName(accountUserName);
@@ -278,7 +407,7 @@ public class DriverApp {
 				isValid = adi.updateAccountbalance(accountId, amount+a.getBalance());
 				a = adi.getAccountByAccountId(accountId);
 				System.out.println(
-						"Successfully deposited $" + amount + " to account.  New balance is $" + a.getBalance());
+						"Successfully deposited $" + amount + " to account. New balance is $" + a.getBalance());
 			}
 			
 		}
@@ -290,7 +419,7 @@ public class DriverApp {
 		double amount;
 		
 		while(!isValid) {
-			System.out.println("Please enter the amount you wish to withdraw or q to exit");
+			System.out.println("Please enter the amount you wish to withdraw");
 			amount = Double.parseDouble(cons.nextLine());
 			if (amount < 0.01) {
 				System.out.println("Cannot withdraw less than one cent.");

@@ -67,6 +67,19 @@ public class UserDaoImpl implements UserDao {
 			return false;	
 	}
 
+	public boolean deleteAllUsers() throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "delete from \"bankuser\"";
+		
+		PreparedStatement ps = conn.prepareStatement(sql);
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}
+		else 
+			return false;	
+	}
+	
 	public ArrayList<User> getAllUsers() throws SQLException {
 		ArrayList<User> userList = new ArrayList<User>();
 		Connection conn = cf.getConnection();
