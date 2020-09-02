@@ -218,14 +218,14 @@ public class DriverApp {
 		int accountId;
 		
 		while(!isValid) {
-			System.out.println("Enter 1 to view active bank accounts");
-			System.out.println("Enter 2 to make a deposit");
-			System.out.println("Enter 3 to withdraw funds");
-			System.out.println("Enter 4 to create new account");
-			System.out.println("Enter 5 to delete account with balance of 0");
-			System.out.println("Enter 6 to log out");
 			
-			if(accounts.size() > 1) {
+			if(accounts.size() > 0) {
+				System.out.println("Enter 1 to view active bank accounts");
+				System.out.println("Enter 2 to make a deposit");
+				System.out.println("Enter 3 to withdraw funds");
+				System.out.println("Enter 4 to create new account");
+				System.out.println("Enter 5 to delete account with balance of 0");
+				System.out.println("Enter 6 to log out");
 				
 				choice = Integer.parseInt(isvalidInteger(cons.nextLine()));
 				switch(choice) {
@@ -270,6 +270,7 @@ public class DriverApp {
 					if(deleteBankAccount(currUser.getUserName())) {
 						System.out.println("Account was deleted successfully");
 					}else System.out.println("No account was deleted");
+					break;
 				case 6:
 					System.out.println("Thank you for choosing "+bankname);
 					isValid = true;
@@ -279,11 +280,13 @@ public class DriverApp {
 			}
 			else {
 				System.out.println("No bank accounts to act on, enter y to create new bank account ");
+				System.out.println("Enter any other key log out");
 				choice = cons.nextLine().toLowerCase().charAt(0);
 				
 				switch(choice) {
 				case 'y':
-					createUser();
+					createAccount(currUser.getUserName());
+					accounts = adi.getAccountsByUserName(currUser.getUserName());
 					break;
 				default:
 					System.out.println("No actions available, login out");
@@ -293,7 +296,7 @@ public class DriverApp {
 		}
 	}
 	public boolean deleteBankAccount(String username) throws SQLException {
-		ArrayList<Account> accounts = adi.getAccountsByUserName(currUser.getUserName());
+		ArrayList<Account> accounts = adi.getAccountsByUserName(username);
 		if(accounts.size()<0)return false;
 		
 		System.out.println("Here are the current accounts with a balance of 0 ");
@@ -309,6 +312,7 @@ public class DriverApp {
 			if(a.getBalance() < 1 && a.getAccountId() == accountId) {
 				System.out.println(a.toString());
 				adi.deleteAccount(accountId);
+				return true;
 			}
 		}	
 		return false;
@@ -390,9 +394,11 @@ public class DriverApp {
 					
 					if( us != null) {
 						updateUserinformation(us);
+						accounts = adi.getAllAccounts();
+						users = udi.getAllUsers();
 					}else System.out.println("An account with the username: "+ username 
 							+" was not founc");
-						
+
 					break;
 				case 7:
 					System.out.println("Enter the username of the account you want to create a new bank account for");
@@ -480,7 +486,7 @@ public class DriverApp {
 			adi.createAccount(udi.getUserByUserName(accountUserName));
 			return true;
 		}else {
-			System.out.println("Limit of 2 accounts");
+			System.out.println("Limit of 3 accounts");
 			return false;
 		}	
 	}
@@ -495,6 +501,7 @@ public class DriverApp {
 			amount = Double.parseDouble(cons.nextLine());
 			if (amount < 0.01) {
 				System.out.println("Cannot deposit less than one cent.");
+				isValid = true;
 			}else {
 				isValid = adi.updateAccountbalance(accountId, amount+a.getBalance());
 				a = adi.getAccountByAccountId(accountId);
@@ -516,8 +523,10 @@ public class DriverApp {
 			amount = Double.parseDouble(cons.nextLine());
 			if (amount < 0.01) {
 				System.out.println("Cannot withdraw less than one cent.");
+				isValid = true;
 			} else if (amount > a.getBalance()) {
 				System.out.println("Cannot overdraw an account.");
+				isValid = true;
 			}else {
 				isValid = adi.updateAccountbalance(accountId,  a.getBalance()- amount);
 				a = adi.getAccountByAccountId(accountId);
