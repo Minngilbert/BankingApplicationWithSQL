@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.revature.DaoImpl.AccountDaoImpl;
 import com.revature.DaoImpl.UserDaoImpl;
 import com.revature.beans.Account;
 import com.revature.beans.User;
+
+
 
 public class DriverApp {
 	
@@ -19,8 +22,9 @@ public class DriverApp {
 
 	private UserDaoImpl udi = new UserDaoImpl();
 	private AccountDaoImpl adi = new AccountDaoImpl();
+	private Logger log = LogManager.getLogger(DriverApp.class);
 	
-	static Logger log = Logger.getLogger(DriverApp.class.getName());	
+	//static Logger log = Logger.getLogger(DriverApp.class.getName());	
 	private static User currUser = null;
 	
 	public static void main(String args[]) {
@@ -403,7 +407,7 @@ public class DriverApp {
 			}
 		}
 	}
-	
+	//deletes all bank account users
 	public void deleteAllBankAccounts() throws SQLException {
 		System.out.println("Are you sure you went to delete all users y/n");
 		char choice = cons.nextLine().toLowerCase().charAt(0);
@@ -419,11 +423,15 @@ public class DriverApp {
 	}
 
 	//creates a new bank account for the user and validates that the user has less than 3 accounts
-	public void createAccount(String accountUserName) throws SQLException {
+	public boolean createAccount(String accountUserName) throws SQLException {
 		ArrayList<Account> accounts = adi.getAccountsByUserName(accountUserName);
 		if(accounts.size() < 3) {
 			adi.createAccount(udi.getUserByUserName(accountUserName));
-		}else System.out.println("Limit of 2 accounts");
+			return true;
+		}else {
+			System.out.println("Limit of 2 accounts");
+			return false;
+		}	
 	}
 	
 	public void doDeposit(int accountId) throws SQLException {
@@ -439,6 +447,7 @@ public class DriverApp {
 			}else {
 				isValid = adi.updateAccountbalance(accountId, amount+a.getBalance());
 				a = adi.getAccountByAccountId(accountId);
+				log.info(currUser.toString() + " deposited $"+ amount + " to account:" +accountId);
 				System.out.println(
 						"Successfully deposited $" + amount + " to account. New balance is $" + a.getBalance());
 			}
