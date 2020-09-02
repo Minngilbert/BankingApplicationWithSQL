@@ -4,8 +4,8 @@
 #### Maven Project w/ Postgres DB
 
 ### Admin credential
-Username = bankadmin
-password = password
+- Username = bankadmin
+- password = password
 
 ##  requirements:
 * A registered user can login with their username and password

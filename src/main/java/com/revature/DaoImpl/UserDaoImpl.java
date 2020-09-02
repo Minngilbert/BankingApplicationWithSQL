@@ -34,6 +34,62 @@ public class UserDaoImpl implements UserDao {
 		}
 		return u;
 	}
+	
+	public boolean updateUserfirstname(User u, String change) throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "update \"bankuser\" set \"firstname\"=? where \"userid\"=?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+
+		ps.setString(1,change);
+		ps.setInt(2,u.getUserId());
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}else
+			return false;
+	}
+	
+	public boolean updateUserlastname(User u, String change) throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "update \"bankuser\" set \"lastname\"=? where \"userid\"=?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+
+		ps.setString(1,change);
+		ps.setInt(2,u.getUserId());
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}else
+			return false;
+	}
+	
+	public boolean updateUserusername(User u, String change) throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "update \"bankuser\" set \"username\"=? where \"userid\"=?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+
+		ps.setString(1,change);
+		ps.setInt(2,u.getUserId());
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}else
+			return false;
+	}
+	
+	public boolean updateUserpsword(User u, String change) throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "update \"bankuser\" set \"psword\"=? where \"userid\"=?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+
+		ps.setString(1,change);
+		ps.setInt(2,u.getUserId());
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}else
+			return false;
+	}
 
 	public boolean createUser(User user) throws SQLException {
 		Connection conn = cf.getConnection();

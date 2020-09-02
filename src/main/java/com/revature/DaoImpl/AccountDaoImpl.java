@@ -93,6 +93,18 @@ public class AccountDaoImpl implements AccountDao {
 			return false;
 	}
 	
+	public boolean deleteAllUsers() throws SQLException {
+		Connection conn = cf.getConnection();
+		String sql = "delete from \"bankuser\"";
+		
+		PreparedStatement ps = conn.prepareStatement(sql);
+		
+		if(ps.executeUpdate() != 0) {
+			return true;
+		}
+		else 
+			return false;	
+	}
 
 	public boolean updateAccountbalance(int accountId, double balance) throws SQLException {
 		Connection conn = cf.getConnection();

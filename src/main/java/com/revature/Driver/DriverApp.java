@@ -20,7 +20,7 @@ public class DriverApp {
 	private String bankname = "Pokeman Bank";
 	private Scanner cons = new Scanner(System.in);
 
-	private UserDaoImpl udi = new UserDaoImpl();
+	private static UserDaoImpl udi = new UserDaoImpl();
 	private AccountDaoImpl adi = new AccountDaoImpl();
 	private Logger log = LogManager.getLogger(DriverApp.class);
 	
@@ -233,6 +233,7 @@ public class DriverApp {
 					for(Account a: accounts) {
 						System.out.println(a.toString());
 					}
+					System.out.println();
 					break;
 				case 2:
 					System.out.println("Please enter the account number you wish to depoist to");
@@ -328,11 +329,9 @@ public class DriverApp {
 			System.out.println("Enter 3 to make a deposit to an account");
 			System.out.println("Enter 4 to withdraw funds from account");
 			System.out.println("Enter 5 to delete users by username");
-			System.out.println("Enter 6 to delete All users");
+			System.out.println("Enter 6 to update user information");
 			System.out.println("Enter 7 to create a new bank account for user");
 			System.out.println("Enter 8 to log out");
-			
-			if(accounts.size() > 1) {
 				
 				choice = Integer.parseInt(isvalidInteger(cons.nextLine()));
 				switch(choice) {
@@ -341,12 +340,14 @@ public class DriverApp {
 					for(Account a: accounts) {
 						System.out.println(a.toString());
 					}
+					System.out.println();
 					break;
 				case 2:
 					//View Open User accounts
 					for(User u: users) {
 						System.out.println(u.toString());
 					}
+					System.out.println();
 					break;
 					
 				case 3:
@@ -383,11 +384,16 @@ public class DriverApp {
 					
 					break;
 				case 6:
-					//delete All Bank Accounts
-					deleteAllBankAccounts();
-					users = udi.getAllUsers();
-					break;
+					System.out.println("Enter username of the account you with to modify");
+					username = cons.nextLine();
+					User us  = udi.getUserByUserName(username);
 					
+					if( us != null) {
+						updateUserinformation(us);
+					}else System.out.println("An account with the username: "+ username 
+							+" was not founc");
+						
+					break;
 				case 7:
 					System.out.println("Enter the username of the account you want to create a new bank account for");
 					username = cons.nextLine();
@@ -398,28 +404,73 @@ public class DriverApp {
 						}
 					}	
 					accounts =  adi.getAllAccounts();
+					break;
 				case 8:
 					isValid = true;
 					break;
 				default:
 					System.out.println("Invalid input, try again");
 				}	
-			}
+			
 		}
 	}
-	//deletes all bank account users
-	public void deleteAllBankAccounts() throws SQLException {
-		System.out.println("Are you sure you went to delete all users y/n");
-		char choice = cons.nextLine().toLowerCase().charAt(0);
-		switch(choice) {
-		case 'y':
-			if(udi.deleteAllUsers()) System.out.println("All accounts have been deleted");
-			break;
-		default:
-			System.out.println("Disaster avoided, all accounts are still safe");
+	//updates User Information
+	public void updateUserinformation(User u) throws SQLException {
+		boolean valid = false;
+		int choice;
 		
+		while(!valid) {
+			System.out.println("Enter 1 to change first Name");
+			System.out.println("Enter 2 to change last Name");
+			System.out.println("Enter 3 to change username");
+			System.out.println("Enter 4 to change password");
+			System.out.println("Enter 5 to go to main menu");
+			
+			choice = Integer.parseInt(isvalidInteger(cons.nextLine()));
+			switch(choice) {
+			case 1:
+				System.out.println("Enter new first name");
+				String name = cons.nextLine();
+				
+				 if(udi.updateUserfirstname(u, name)) {
+					 System.out.println("Account was succesfully updated");
+				 }else System.out.println("Account was not updated");
+				break;
+			case 2:
+				System.out.println("Enter new last name");
+				name = cons.nextLine();
+				
+				 if(udi.updateUserlastname(u, name)) {
+					 System.out.println("Account was succesfully updated");
+				 }else System.out.println("Account was not updated");
+				break;
+			case 3:
+				
+				System.out.println("Enter new username");
+				name = cons.nextLine();
+				
+				 if(udi.updateUserusername(u, name)) {
+					 System.out.println("Account was succesfully updated");
+				 }else System.out.println("Account was not updated");
+				break;
+			case 4:
+				System.out.println("Enter new password");
+				name = cons.nextLine();
+				
+				 if(udi.updateUserpsword(u, name)) {
+					 System.out.println("Account was succesfully updated");
+				 }else System.out.println("Account was not updated");
+				break;
+			case 5:
+				System.out.println("Entering main menu");
+				valid = true;
+				break;
+			default:
+				System.out.println("invalid input, try again");
+				System.out.println();
+				
+			}
 		}
-		
 	}
 
 	//creates a new bank account for the user and validates that the user has less than 3 accounts
@@ -475,6 +526,20 @@ public class DriverApp {
 				log.info(currUser.toString() + " withdrew $"+ amount + " to account:" +accountId);
 			}
 		}
+	}
+	//deletes all bank account users
+	public void deleteAllBankAccounts() throws SQLException {
+		System.out.println("Are you sure you went to delete all users y/n");
+		char choice = cons.nextLine().toLowerCase().charAt(0);
+		switch(choice) {
+		case 'y':
+			if(udi.deleteAllUsers()) System.out.println("All accounts have been deleted");
+			break;
+		default:
+			System.out.println("Disaster avoided, all accounts are still safe");
+		
+		}
+		
 	}
 }
 
