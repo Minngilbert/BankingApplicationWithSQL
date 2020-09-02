@@ -206,27 +206,28 @@ public class DriverApp {
 	public void userMenu() throws SQLException {
 		
 		ArrayList<Account> accounts = adi.getAccountsByUserName(currUser.getUserName());
-		char choice ;
+		int choice ;
 		boolean isValid = false;
 		int accountId;
 		
 		while(!isValid) {
-			System.out.println("Enter V to view active bank accounts");
-			System.out.println("Enter D to make a deposit");
-			System.out.println("Enter W to withdraw funds");
-			System.out.println("Enter C to create new account");
-			System.out.println("Enter q to log out");
+			System.out.println("Enter 1 to view active bank accounts");
+			System.out.println("Enter 2 to make a deposit");
+			System.out.println("Enter 3 to withdraw funds");
+			System.out.println("Enter 4 to create new account");
+			System.out.println("Enter 5 to delete account with balance of 0");
+			System.out.println("Enter 6 to log out");
 			
 			if(accounts.size() > 1) {
 				
-				choice = cons.nextLine().toLowerCase().charAt(0);
+				choice = Integer.parseInt(isvalidInteger(cons.nextLine()));
 				switch(choice) {
-				case 'v':
+				case 1:
 					for(Account a: accounts) {
 						System.out.println(a.toString());
 					}
 					break;
-				case 'd':
+				case 2:
 					System.out.println("Please enter the account number you wish to depoist to");
 					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
 					if(accountId == 0 && !isValidId(accountId)) {
@@ -234,7 +235,7 @@ public class DriverApp {
 						break;
 					}else doDeposit(accountId);
 					break;
-				case 'w':
+				case 3:
 					
 					System.out.println("Please enter the account number you wish to withdraw from");
 					accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
@@ -249,15 +250,18 @@ public class DriverApp {
 				
 			
 					break;
-				case 'c':
+				case 4:
 					createAccount(currUser.getUserName());
 					accounts = adi.getAccountsByUserName(currUser.getUserName());
 					break;
-				case 'q':
+				case 5:
+					if(deleteBankAccount(currUser.getUserName())) {
+						System.out.println("Account was deleted successfully");
+					}else System.out.println("No account was deleted");
+				case 6:
 					isValid = true;
 					break;
-				}
-				
+				}	
 				
 			}
 			else {
@@ -274,6 +278,27 @@ public class DriverApp {
 				}	
 			}
 		}
+	}
+	public boolean deleteBankAccount(String username) throws SQLException {
+		ArrayList<Account> accounts = adi.getAccountsByUserName(currUser.getUserName());
+		if(accounts.size()<0)return false;
+		
+		System.out.println("Here are the current accounts with a balance of 0 ");
+		for(Account a: accounts) {
+			if(a.getBalance() < 1) {
+				System.out.println(a.toString());
+			}
+		}
+		
+		int accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
+		
+		for(Account a: accounts) {
+			if(a.getBalance() < 1 && a.getAccountId() == accountId) {
+				System.out.println(a.toString());
+				adi.deleteAccount(accountId);
+			}
+		}	
+		return false;
 	}
 	
 	
