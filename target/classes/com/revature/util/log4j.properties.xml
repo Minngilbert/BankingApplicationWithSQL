@@ -1,0 +1,20 @@
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration>
+
+<appender bankzero="DB" class="org.apache.log4j.jdbc.JDBCAppender">
+   <param bankzero="url" value="jdbc:postgresql://pegausf2008.cugpm5ebzq0g.us-east-2.rds.amazonaws.com/bankzero"/>
+   <param bankzero="driver" value="com.mysql.jdbc.Driver"/>
+   <param bankzero="user" value="bankadmin"/>
+   <param bankzero="password" value="password"/>
+   <param bankzero="sql" value="INSERT INTO LOGS VALUES('%x','%d','%C','%p','%m')"/>
+   
+   <layout class="org.apache.log4j.PatternLayout">
+   </layout>
+</appender>
+
+<logger name="log4j.rootLogger" additivity="false">
+   <level value="DEBUG"/>
+   <appender-ref ref="DB"/>
+</logger>
+
+</log4j:configuration>

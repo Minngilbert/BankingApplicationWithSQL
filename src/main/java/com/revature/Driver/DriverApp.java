@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import com.revature.DaoImpl.AccountDaoImpl;
 import com.revature.DaoImpl.UserDaoImpl;
 import com.revature.beans.Account;
@@ -18,6 +20,7 @@ public class DriverApp {
 	private UserDaoImpl udi = new UserDaoImpl();
 	private AccountDaoImpl adi = new AccountDaoImpl();
 	
+	static Logger log = Logger.getLogger(DriverApp.class.getName());	
 	private static User currUser = null;
 	
 	public static void main(String args[]) {
@@ -233,7 +236,10 @@ public class DriverApp {
 					if(accountId == 0 && !isValidId(accountId)) {
 						System.out.println("The account entered does not exist");
 						break;
-					}else doDeposit(accountId);
+					}else {
+						doDeposit(accountId);
+						accounts = adi.getAccountsByUserName(currUser.getUserName());
+					}
 					break;
 				case 3:
 					
@@ -244,6 +250,7 @@ public class DriverApp {
 						for(Account a: accounts) {
 							if(a.getAccountId() == accountId) {
 								doWithdrawal(accountId);
+								accounts = adi.getAccountsByUserName(currUser.getUserName());
 							}
 						}
 					}else System.out.println("The account entered does not exist");
@@ -259,6 +266,7 @@ public class DriverApp {
 						System.out.println("Account was deleted successfully");
 					}else System.out.println("No account was deleted");
 				case 6:
+					System.out.println("Thank you for choosing "+bankname);
 					isValid = true;
 					break;
 				}	
@@ -289,7 +297,7 @@ public class DriverApp {
 				System.out.println(a.toString());
 			}
 		}
-		
+		System.out.println("Enter the accountId you wish to delete");
 		int accountId = Integer.parseInt(isvalidInteger(cons.nextLine()));
 		
 		for(Account a: accounts) {
@@ -451,11 +459,11 @@ public class DriverApp {
 			} else if (amount > a.getBalance()) {
 				System.out.println("Cannot overdraw an account.");
 			}else {
-				isValid = adi.updateAccountbalance(accountId, amount - a.getBalance());
+				isValid = adi.updateAccountbalance(accountId,  a.getBalance()- amount);
 				a = adi.getAccountByAccountId(accountId);
 				System.out.println(
 						"Successfully withdrew $" + amount + " to account.  New balance is $" + a.getBalance());
-			
+				log.info(currUser.toString() + " withdrew $"+ amount + " to account:" +accountId);
 			}
 		}
 	}
