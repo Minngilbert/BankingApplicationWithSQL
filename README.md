@@ -3,7 +3,7 @@
 # Bank Assignment - Gilbert Mwangi
 #### Maven Project w/ Postgres DB
 
-### Admin credental
+### Admin credential
 Username = bankadmin
 password = password
 
